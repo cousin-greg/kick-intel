@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Streamer {
+  id             Int                 @id @default(autoincrement())
+  username       String              @unique
+  kickUrl        String
+  avatarUrl      String?
+  followersCount Int                 @default(0)
+  casino         String?
+  casinoSlug     String?
+  isLive         Boolean             @default(false)
+  lastSeenAt     DateTime?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  snapshots      StreamerSnapshot[]
+  leaderboard    LeaderboardEntry[]
+}
+
+model StreamerSnapshot {
+  id             Int      @id @default(autoincrement())
+  streamerId     Int
+  followersCount Int
+  avgViewers7d   Int      @default(0)
+  peakViewers30d Int      @default(0)
+  estMonthlyVol  String?
+  capturedAt     DateTime @default(now())
+  streamer       Streamer @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+
+  @@index([streamerId])
+  @@index([capturedAt])
+}
+
+model LeaderboardEntry {
+  id              Int      @id @default(autoincrement())
+  streamerId      Int
+  casino          String
+  rank            Int
+  estimatedVolume String?
+  capturedAt      DateTime @default(now())
+  streamer        Streamer @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+
+  @@index([streamerId])
+  @@index([casino])
+  @@index([capturedAt])
+}
