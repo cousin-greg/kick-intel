@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "postinstall": "prisma generate",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "db:seed": "npx tsx prisma/seed.ts",
@@ -16,7 +17,6 @@
   },
   "dependencies": {
     "@prisma/client": "^6.19.2",
-    "better-sqlite3": "^12.6.2",
     "dotenv": "^17.3.1",
     "next": "14.2.35",
     "prisma": "^6.19.2",
@@ -24,7 +24,6 @@
     "react-dom": "^18"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
