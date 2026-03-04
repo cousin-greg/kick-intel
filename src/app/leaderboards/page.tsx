@@ -4,6 +4,20 @@ import CasinoBadge from '@/components/CasinoBadge'
 
 export const dynamic = 'force-dynamic'
 
+function formatVolume(vol: string | null): string {
+  if (!vol) return '--'
+  const num = parseInt(vol)
+  if (isNaN(num)) return vol
+  if (num >= 1000000) {
+    const m = num / 1000000
+    return `$${m % 1 === 0 ? m.toFixed(0) : m.toFixed(1)}M/mo`
+  }
+  if (num >= 1000) {
+    return `$${Math.round(num / 1000)}K/mo`
+  }
+  return `$${num}/mo`
+}
+
 export default async function LeaderboardsPage() {
   const entries = await prisma.leaderboardEntry.findMany({
     include: {
@@ -16,7 +30,6 @@ export default async function LeaderboardsPage() {
   const byCasino: Record<string, typeof entries> = {}
   for (const entry of entries) {
     if (!byCasino[entry.casino]) byCasino[entry.casino] = []
-    // Deduplicate: keep latest entry per streamer per casino
     const existing = byCasino[entry.casino].find(e => e.streamerId === entry.streamerId)
     if (!existing) {
       byCasino[entry.casino].push(entry)
@@ -24,13 +37,17 @@ export default async function LeaderboardsPage() {
   }
 
   const casinoNames = Object.keys(byCasino).sort()
+  const totalRanked = entries.length
 
   return (
     <div className="p-6 md:p-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Leaderboards</h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
-          Rankings by casino
+          {totalRanked} ranked streamers across {casinoNames.length} casinos
+        </p>
+        <p className="text-xs mt-1" style={{ color: 'var(--text-muted)', opacity: 0.7 }}>
+          Data updated: March 3, 2026
         </p>
       </div>
 
@@ -60,8 +77,8 @@ export default async function LeaderboardsPage() {
                     <tr style={{ backgroundColor: 'var(--bg-secondary)', borderBottom: '1px solid var(--border)' }}>
                       <th className="text-right py-3 px-4 font-medium w-20" style={{ color: 'var(--text-muted)' }}>Rank</th>
                       <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-muted)' }}>Streamer</th>
-                      <th className="text-right py-3 px-4 font-medium" style={{ color: 'var(--text-muted)' }}>Est. Volume</th>
-                      <th className="text-right py-3 px-4 font-medium" style={{ color: 'var(--text-muted)' }}>Last Updated</th>
+                      <th className="text-right py-3 px-4 font-medium" style={{ color: 'var(--text-muted)' }}>Followers</th>
+                      <th className="text-right py-3 px-4 font-medium" style={{ color: 'var(--text-muted)' }}>Est. Monthly Volume</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -77,11 +94,11 @@ export default async function LeaderboardsPage() {
                             {entry.streamer.username}
                           </Link>
                         </td>
-                        <td className="py-3 px-4 text-right" style={{ color: 'var(--green-live)' }}>
-                          {entry.estimatedVolume || '--'}
+                        <td className="py-3 px-4 text-right tabular-nums" style={{ color: 'var(--text-muted)' }}>
+                          {entry.streamer.followersCount.toLocaleString()}
                         </td>
-                        <td className="py-3 px-4 text-right" style={{ color: 'var(--text-muted)' }}>
-                          {new Date(entry.capturedAt).toLocaleDateString()}
+                        <td className="py-3 px-4 text-right font-medium" style={{ color: 'var(--green-live)' }}>
+                          {formatVolume(entry.estimatedVolume)}
                         </td>
                       </tr>
                     ))}

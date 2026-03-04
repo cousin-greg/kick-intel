@@ -11,12 +11,13 @@ interface StreamerData {
   avgViewers: number
   peakViewers: number
   estVolume: string
+  estVolumeNum: number | null
   lbRank: number | null
   isLive: boolean
   lastSeenAt: string | null
 }
 
-type SortKey = 'username' | 'casino' | 'followersCount' | 'avgViewers' | 'peakViewers' | 'lbRank'
+type SortKey = 'username' | 'casino' | 'followersCount' | 'avgViewers' | 'peakViewers' | 'lbRank' | 'estVolumeNum'
 
 interface Props {
   data: StreamerData[]
@@ -27,7 +28,7 @@ export default function StreamerTable({ data, casinos }: Props) {
   const [search, setSearch] = useState('')
   const [casinoFilter, setCasinoFilter] = useState('')
   const [minFollowers, setMinFollowers] = useState('')
-  const [sortKey, setSortKey] = useState<SortKey>('followersCount')
+  const [sortKey, setSortKey] = useState<SortKey>('estVolumeNum')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
 
   const filtered = useMemo(() => {
@@ -146,8 +147,8 @@ export default function StreamerTable({ data, casinos }: Props) {
                 <th className="text-right py-3 px-4 font-medium cursor-pointer select-none" style={{ color: 'var(--text-muted)' }} onClick={() => handleSort('peakViewers')}>
                   Peak Viewers{sortIcon('peakViewers')}
                 </th>
-                <th className="text-right py-3 px-4 font-medium" style={{ color: 'var(--text-muted)' }}>
-                  Est. Volume
+                <th className="text-right py-3 px-4 font-medium cursor-pointer select-none" style={{ color: 'var(--text-muted)' }} onClick={() => handleSort('estVolumeNum')}>
+                  Est. Volume{sortIcon('estVolumeNum')}
                 </th>
                 <th className="text-right py-3 px-4 font-medium cursor-pointer select-none" style={{ color: 'var(--text-muted)' }} onClick={() => handleSort('lbRank')}>
                   LB Rank{sortIcon('lbRank')}
